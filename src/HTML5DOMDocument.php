@@ -128,8 +128,8 @@ class HTML5DOMDocument extends \DOMDocument
         }
 
         // Preserve html entities
-        $source = preg_replace('/&([a-zA-Z]*);/', 'html5-dom-document-internal-entity1-$1-end', $source);
-        $source = preg_replace('/&#([0-9]*);/', 'html5-dom-document-internal-entity2-$1-end', $source);
+        $source = preg_replace('/&([a-zA-Z]*);/', '<html5-dom-document-internal-entity1-$1></html5-dom-document-internal-entity1-$1>', $source);
+        $source = preg_replace('/&#([0-9]*);/', '<html5-dom-document-internal-entity2-$1></html5-dom-document-internal-entity2-$1>', $source);
 
         $result = parent::loadHTML('<?xml encoding="utf-8" ?>' . $source, $options);
         if ($internalErrorsOptionValue === false) {
@@ -290,6 +290,13 @@ class HTML5DOMDocument extends \DOMDocument
                 $tempDomDocument->childNodes[1]->appendChild($tempDomDocument->importNode(clone($node), true));
                 $html = $tempDomDocument->saveHTML();
                 $html = substr($html, 22, -7); // remove the DOCTYPE + the new line after + html tag
+            } elseif (preg_match('%html5-dom-document-internal-entity([1-2])-(.+)%', $node->nodeName, $matches)) {
+                if ($matches[1] == "1") {
+                    $html = '&' . $matches[2] . ';';
+                }
+                elseif ($matches[1] == "2") {
+                    $html = '&#' . $matches[2] . ';';
+                }
             } else {
                 $isInHead = false;
                 $parentNode = $node;
@@ -343,8 +350,8 @@ class HTML5DOMDocument extends \DOMDocument
             }
 
             if (strpos($html, 'html5-dom-document-internal-entity') !== false) {
-                $html = preg_replace('/html5-dom-document-internal-entity1-(.*?)-end/', '&$1;', $html);
-                $html = preg_replace('/html5-dom-document-internal-entity2-(.*?)-end/', '&#$1;', $html);
+                $html = preg_replace('%<html5-dom-document-internal-entity1-(.*?)></html5-dom-document-internal-entity1-(.*?)>%', '&$1;', $html);
+                $html = preg_replace('%<html5-dom-document-internal-entity2-(.*?)></html5-dom-document-internal-entity2-(.*?)>%', '&#$1;', $html);
             }
 
             $codeToRemove = [
@@ -366,7 +373,7 @@ class HTML5DOMDocument extends \DOMDocument
 
     /**
      * Dumps the internal document into a file using HTML formatting.
-     * 
+     *
      * @param string $filename The path to the saved HTML document.
      * @return int the number of bytes written or FALSE if an error occurred.
      */
@@ -570,7 +577,7 @@ class HTML5DOMDocument extends \DOMDocument
 
     /**
      * Applies the modifications specified to the DOM document.
-     * 
+     *
      * @param int $modifications The modifications to apply. Available values:
      *  - HTML5DOMDocument::FIX_MULTIPLE_TITLES - removes all but the last title elements.
      *  - HTML5DOMDocument::FIX_DUPLICATE_METATAGS - removes all but the last metatags with matching name or property attributes.
