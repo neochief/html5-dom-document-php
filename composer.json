@@ -1,5 +1,5 @@
 {
-    "name": "ivopetkov/html5-dom-document-php",
+    "name": "neochief/html5-dom-document-php",
     "description": "HTML5 DOMDocument PHP library (extends DOMDocument)",
     "license": "MIT",
     "authors": [
