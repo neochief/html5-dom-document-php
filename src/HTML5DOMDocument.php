@@ -354,6 +354,10 @@ class HTML5DOMDocument extends \DOMDocument
                 $html = preg_replace('%<html5-dom-document-internal-entity2-(.*?)></html5-dom-document-internal-entity2-(.*?)>%', '&#$1;', $html);
             }
 
+            $voidTags = array('area','base','br','col','command','embed','hr','img','input','keygen','link','meta','param','source','track','wbr');
+            $regEx = '#<('.implode('|', $voidTags).')(\b[^>]*)>#';
+            $html = preg_replace($regEx, '<\\1\\2 />', $html);
+
             $codeToRemove = [
                 'html5-dom-document-internal-content',
                 '<meta data-html5-dom-document-internal-attribute="charset-meta" http-equiv="content-type" content="text/html; charset=utf-8">',
